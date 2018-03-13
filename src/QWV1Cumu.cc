@@ -132,7 +132,7 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	for ( int i = 0; i < sz; i++ ) {
 		int ieta = ((*hEta)[i] + 2.4) * 10;
-		if ( ieta < 0 or ieta >= 24 ) continue;
+		if ( ieta < 0 or ieta >= 48 ) continue;
 		q3[ieta].fill( (*hPhi)[i], (*hWeight)[i] );
 	}
 	for ( int i = 0; i < 48; i++ ) {
@@ -142,8 +142,8 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int ieta = 0; ieta < 48; ieta++ ) {
 		correlations::Complex qp = 0;
 		double wt = 0;
-		correlations::QVector tq = q3[ieta];
 		for ( int i = 0; i < sz; i++ ) {
+			correlations::QVector tq = q3[ieta];
 			if ( ieta == int(((*hEta)[i] + 2.4) * 10) ) {
 				tq.unfill((*hPhi)[i], (*hWeight)[i]);
 			}
