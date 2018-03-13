@@ -86,8 +86,8 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	trV->Branch("Noff", &gNoff, "Noff/I");
 	trV->Branch("Mult", &gMult, "Mult/I");
 
-	trV->Branch("rQ1Q1_Q2", &rQ1Q1_Q2, "rQ1Q1_Q2[48]");
-	trV->Branch("wQ1Q1_Q2", &rQ1Q1_Q2, "rQ1Q1_Q2[48]");
+	trV->Branch("rQ1Q1_Q2", &rQ1Q1_Q2, "rQ1Q1_Q2[48]/D");
+	trV->Branch("wQ1Q1_Q2", &wQ1Q1_Q2, "wQ1Q1_Q2[48]/D");
 
 	cout << " cmode_ = " << cmode_ << endl;
 
@@ -131,17 +131,20 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if ( sz == 0 ) return;
 
 	for ( int i = 0; i < sz; i++ ) {
-		int ieta = (hEta[i] + 2.4) * 10;
+		int ieta = ((*hEta)[i] + 2.4) * 10;
 		if ( ieta < 0 or ieta >= 24 ) continue;
 		q3[ieta].fill( (*hPhi)[i], (*hWeight)[i] );
 	}
-
-	for ( int ieta = 0; ieta < 24; ieta++ ) {
+	for ( int i = 0; i < 48; i++ ) {
+		rQ1Q1_Q2[i] = 0;
+		wQ1Q1_Q2[i] = 0;
+	}
+	for ( int ieta = 0; ieta < 48; ieta++ ) {
 		correlations::Complex qp = 0;
 		double wt = 0;
 		correlations::QVector tq = q3[ieta];
 		for ( int i = 0; i < sz; i++ ) {
-			if ( ieta == int((hEta[i] + 2.4) * 10) ) {
+			if ( ieta == int(((*hEta)[i] + 2.4) * 10) ) {
 				tq.unfill((*hPhi)[i], (*hWeight)[i]);
 			}
 			correlations::FromQVector *cq = 0;

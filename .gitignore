@@ -1,4 +1,5 @@
 bin/
+PbPb2015_cumu
 test/*
 !test/PbPb_*.py
 !test/qw*.py
