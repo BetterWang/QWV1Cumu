@@ -42,16 +42,16 @@ QWPhiWeightCent::QWPhiWeightCent(const edm::ParameterSet& pset) :
 	srcPhi_(pset.getUntrackedParameter<edm::InputTag>("srcPhi")),
 	srcEta_(pset.getUntrackedParameter<edm::InputTag>("srcEta")),
 	srcPt_(pset.getUntrackedParameter<edm::InputTag>("srcPt")),
-	centralityTag_( iConfig.getUntrackedParameter<edm::InputTag>("centrality") ),
+	centralityTag_( pset.getUntrackedParameter<edm::InputTag>("centrality") ),
 	srcWeight_(pset.getUntrackedParameter<edm::InputTag>("srcWeight"))
 {
 	consumes<std::vector<double> >(srcPhi_);
 	consumes<std::vector<double> >(srcEta_);
 	consumes<std::vector<double> >(srcPt_);
 	consumes<std::vector<double> >(srcWeight_);
-	consumes<int>(centralityTag_),
+	consumes<int>(centralityTag_);
 
-	TFile *f = new TFile(src_.label().c_str());
+	TFile * f = new TFile(src_.label().c_str());
 	for ( int i = 0; i < Npt; i++ ) {
 		for ( int c = 0; c < 10; c++ ) {
 			hPhi[c][i] = (TH2D*) f->Get(Form("QWAcc0/hc_%i", i));
@@ -126,7 +126,7 @@ void QWPhiWeightCent::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 		pw.push_back(weight);
 	}
 
-	iEvent.put(std::make_unique<std::vector<double> >(pw), string(""));
+	iEvent.put(std::make_unique<std::vector<double> >(pw), std::string(""));
 }
 
 
