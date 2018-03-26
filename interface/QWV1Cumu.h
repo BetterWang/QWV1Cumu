@@ -70,12 +70,12 @@ class QWV1Cumu : public edm::EDAnalyzer {
 		int gMult;
 		int gNoff;
 
-		double rQ1Q1_Q2[48];
-		double wQ1Q1_Q2[48];
+		double rQ1Q1_Q2[12];
+		double wQ1Q1_Q2[12];
 
 
 		correlations::HarmonicVector	hc;
-		correlations::QVector		q3[48];
+		correlations::QVector		q3[12];
 
 		void initQ();
 		void doneQ();
