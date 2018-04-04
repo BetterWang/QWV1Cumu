@@ -11,7 +11,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-#process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
 
@@ -44,6 +44,7 @@ process.V1Cumu = cms.EDAnalyzer('QWV1Cumu'
 	, trackPt = cms.untracked.InputTag('QWGenEvent', "pt")
 	, trackWeight = cms.untracked.InputTag('QWGenEvent', "weight")
 	, trackCharge = cms.untracked.InputTag('QWGenEvent', "charge")
+	, RP = cms.untracked.InputTag('QWHIEvent', "EP")
 	, vertexZ = cms.untracked.InputTag('QWGenEvent', "vz")
 	, centrality = cms.untracked.InputTag('AMPTCentrality', 'AMPT')
 	, minvz = cms.untracked.double(-15.0)
@@ -61,6 +62,13 @@ process.histNoff = cms.EDAnalyzer('QWHistAnalyzer',
 		Nbins = cms.untracked.int32(200),
 		start = cms.untracked.double(0),
 		end = cms.untracked.double(200),
+		)
+
+process.histRP = cms.EDAnalyzer('QWHistDAnalyzer',
+		src = cms.untracked.InputTag("QWHIEvent", "EP"),
+		Nbins = cms.untracked.int32(1000),
+		start = cms.untracked.double(0),
+		end = cms.untracked.double(2*3.14159265358979323846),
 		)
 
 process.vectPhi = cms.EDAnalyzer('QWVectorAnalyzer',
@@ -101,7 +109,7 @@ process.RECO = cms.OutputModule("PoolOutputModule",
 	fileName = cms.untracked.string('reco.root')
 )
 
-process.vectMon = cms.Sequence(process.histNoff*process.vectPhi*process.vectPt*process.vectEta)
+process.vectMon = cms.Sequence(process.histNoff*process.histRP*process.vectPhi*process.vectPt*process.vectEta)
 
 process.ana = cms.Path(
 		process.GeneInfo *

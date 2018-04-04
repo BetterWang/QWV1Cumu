@@ -52,6 +52,7 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	trackPt_( iConfig.getUntrackedParameter<edm::InputTag>("trackPt") ),
 	trackWeight_( iConfig.getUntrackedParameter<edm::InputTag>("trackWeight") ),
 	vertexZ_( iConfig.getUntrackedParameter<edm::InputTag>("vertexZ") ),
+	RP_( iConfig.getUntrackedParameter<edm::InputTag>("RP") ),
 	centralityTag_( iConfig.getUntrackedParameter<edm::InputTag>("centrality") )
 {
 	//now do what ever initialization is needed
@@ -72,6 +73,7 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
         consumes<std::vector<double> >(trackPt_);
         consumes<std::vector<double> >(trackWeight_);
         consumes<std::vector<double> >(vertexZ_);
+        consumes<double>(RP_);
 
 	for ( int i = 0; i < 12; i++ ) {
 		q3[i] = correlations::QVector(0, 0, true);
@@ -88,6 +90,10 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 
 	trV->Branch("rQ1Q1_Q2", &rQ1Q1_Q2, "rQ1Q1_Q2[12]/D");
 	trV->Branch("wQ1Q1_Q2", &wQ1Q1_Q2, "wQ1Q1_Q2[12]/D");
+
+	trV->Branch("rV1", &rV1, "rV1[12]/D");
+	trV->Branch("rV2", &rV2, "rV2[12]/D");
+	trV->Branch("wV",  &wV,  "wV[12]/D");
 
 	cout << " cmode_ = " << cmode_ << endl;
 
@@ -118,12 +124,14 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	Handle<std::vector<double> >	hPt;
 	Handle<std::vector<double> >	hWeight;
 	Handle<std::vector<double> >	hVz;
+	Handle<double>			hRP;
 
 	iEvent.getByLabel(trackEta_,	hEta);
 	iEvent.getByLabel(trackPhi_,	hPhi);
 	iEvent.getByLabel(trackPt_,	hPt);
 	iEvent.getByLabel(trackWeight_, hWeight);
 	iEvent.getByLabel(vertexZ_, 	hVz);
+	iEvent.getByLabel(RP_,	 	hRP);
 
 	if ( hVz->size() < 1 ) return;
 	if ( fabs((*hVz)[0]) > maxvz_ or fabs((*hVz)[0]) < minvz_ ) return;
@@ -138,6 +146,9 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	for ( int i = 0; i < 12; i++ ) {
 		rQ1Q1_Q2[i] = 0;
 		wQ1Q1_Q2[i] = 0;
+		rV1[i] = 0;
+		rV2[i] = 0;
+		wV[i] = 0;
 	}
 	for ( int ieta = 0; ieta < 12; ieta++ ) {
 		correlations::Complex qp = 0;
@@ -168,6 +179,15 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		wQ1Q1_Q2[ieta] = wt;
 	}
 
+	for ( int i = 0; i < sz; i++ ) {
+		int ieta = int(((*hEta)[i] + 2.4) * 10/4);
+		if ( ieta < 0 or ieta >= 12 ) continue;
+
+		rV1[ieta] += (*hWeight)[i] * TMath::Cos( (*hPhi)[i] - (*hRP) );
+		rV2[ieta] += (*hWeight)[i] * TMath::Cos( 2.*(*hPhi)[i] - (*hRP) );
+
+		wV[ieta] += (*hWeight)[i];
+	}
 	edm::Handle<int> ch;
 	iEvent.getByLabel(centralityTag_,ch);
 	gNoff = *ch;

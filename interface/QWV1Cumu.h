@@ -52,6 +52,7 @@ class QWV1Cumu : public edm::EDAnalyzer {
 		edm::InputTag					trackPt_;
 		edm::InputTag					trackWeight_;
 		edm::InputTag					vertexZ_;
+		edm::InputTag					RP_;
 
 		edm::InputTag					centralityTag_;
 
@@ -72,6 +73,10 @@ class QWV1Cumu : public edm::EDAnalyzer {
 
 		double rQ1Q1_Q2[12];
 		double wQ1Q1_Q2[12];
+
+		double rV1[12];
+		double rV2[12];
+		double wV[12];
 
 
 		correlations::HarmonicVector	hc;

@@ -5,7 +5,7 @@ from httplib import HTTPException
 
 config = config()
 
-config.General.requestName = 'AMPT1_V1_v1'
+config.General.requestName = 'AMPT1_V1_v2'
 config.General.workArea = 'CrabArea'
 config.General.transferOutputs = True
 config.General.transferLogs = True
@@ -33,7 +33,7 @@ except ClientException as cle:
         print "Failed submitting task: %s" % (cle)
 
 
-config.General.requestName = 'AMPT2_V1_v1'
+config.General.requestName = 'AMPT2_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch2-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -45,7 +45,7 @@ except ClientException as cle:
 
 
 
-config.General.requestName = 'AMPT3_V1_v1'
+config.General.requestName = 'AMPT3_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch3-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -56,7 +56,7 @@ except ClientException as cle:
 
 
 
-config.General.requestName = 'AMPT4_V1_v1'
+config.General.requestName = 'AMPT4_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch4-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -67,7 +67,7 @@ except ClientException as cle:
 
 
 
-config.General.requestName = 'AMPT5_V1_v1'
+config.General.requestName = 'AMPT5_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch5-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -77,7 +77,7 @@ except ClientException as cle:
         print "Failed submitting task: %s" % (cle)
 
 
-config.General.requestName = 'AMPT6_V1_v1'
+config.General.requestName = 'AMPT6_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch6-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -87,7 +87,7 @@ except ClientException as cle:
         print "Failed submitting task: %s" % (cle)
 
 
-config.General.requestName = 'AMPT7_V1_v1'
+config.General.requestName = 'AMPT7_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch7-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -98,7 +98,7 @@ except ClientException as cle:
 
 
 
-config.General.requestName = 'AMPT8_V1_v1'
+config.General.requestName = 'AMPT8_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch8-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -109,7 +109,7 @@ except ClientException as cle:
 
 
 
-config.General.requestName = 'AMPT9_V1_v1'
+config.General.requestName = 'AMPT9_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch9-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
@@ -120,7 +120,7 @@ except ClientException as cle:
 
 
 
-config.General.requestName = 'AMPT10_V1_v1'
+config.General.requestName = 'AMPT10_V1_v2'
 config.Data.inputDataset = '/AMPT_PbPb5TeV_Gen/davidlw-mb_string_batch10-ceca3f60d503999c0ee34e74626e4441/USER'
 try:
         crabCommand('submit', config = config)
