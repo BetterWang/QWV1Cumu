@@ -184,7 +184,7 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		if ( ieta < 0 or ieta >= 12 ) continue;
 
 		rV1[ieta] += (*hWeight)[i] * TMath::Cos( (*hPhi)[i] - (*hRP) );
-		rV2[ieta] += (*hWeight)[i] * TMath::Cos( 2.*(*hPhi)[i] - (*hRP) );
+		rV2[ieta] += (*hWeight)[i] * TMath::Cos( 2.*((*hPhi)[i] - (*hRP)) );
 
 		wV[ieta] += (*hWeight)[i];
 	}
