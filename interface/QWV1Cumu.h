@@ -57,6 +57,7 @@ class QWV1Cumu : public edm::EDAnalyzer {
 		edm::InputTag					centralityTag_;
 
 		double	minvz_, maxvz_;
+		double	etaCmin_, etaCmax_;
 	/////////////////////////////////////////////
 //		double	rfpmineta_, rfpmaxeta_;
 //		double	rfpminpt_, rfpmaxpt_;
@@ -80,7 +81,9 @@ class QWV1Cumu : public edm::EDAnalyzer {
 
 
 		correlations::HarmonicVector	hc;
+		correlations::HarmonicVector	hc2;
 		correlations::QVector		q3[12];
+		correlations::QVector		qC;
 
 		void initQ();
 		void doneQ();

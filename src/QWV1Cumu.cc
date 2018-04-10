@@ -59,6 +59,9 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	minvz_ = iConfig.getUntrackedParameter<double>("minvz", -15.);
 	maxvz_ = iConfig.getUntrackedParameter<double>("maxvz", 15.);
 
+	etaCmin_ = iConfig.getUntrackedParameter<double>("etaCmin", -2.4);
+	etaCmax_ = iConfig.getUntrackedParameter<double>("etaCmax", 2.4);
+
 //	rfpmineta_ = iConfig.getUntrackedParameter<double>("rfpmineta", -2.4);
 //	rfpmaxeta_ = iConfig.getUntrackedParameter<double>("rfpmaxeta", 2.4);
 //	rfpminpt_ = iConfig.getUntrackedParameter<double>("rfpminpt", 0.3);
@@ -78,6 +81,7 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	for ( int i = 0; i < 12; i++ ) {
 		q3[i] = correlations::QVector(0, 0, true);
 	}
+	qC = correlations::QVector(0, 0, true);
 
 	//
 	//cout << __LINE__ << "\t" << tracks_.label().c_str() << "\t|" << tracks_.instance() << "\t|" << tracks_.process() << endl;
@@ -138,11 +142,19 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	int sz = int(hEta->size());
 	if ( sz == 0 ) return;
 
+	std::vector<int>	vEtaBin(sz);
+
 	for ( int i = 0; i < sz; i++ ) {
+		if ( ((*hEta)[i]) > etaCmin_ and ((*hEta)[i]) < etaCmax_ ) qC.fill( (*hPhi)[i], (*hWeight)[i] );
 		int ieta = (((*hEta)[i] + 2.4) * 10)/4;
-		if ( ieta < 0 or ieta >= 12 ) continue;
+		vEtaBin[ieta] = ieta;
+		if ( ieta < 0 or ieta >= 12 ) {
+			continue;
+		};
 		q3[ieta].fill( (*hPhi)[i], (*hWeight)[i] );
+
 	}
+
 	for ( int i = 0; i < 12; i++ ) {
 		rQ1Q1_Q2[i] = 0;
 		wQ1Q1_Q2[i] = 0;
@@ -150,34 +162,66 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		rV2[i] = 0;
 		wV[i] = 0;
 	}
-	for ( int ieta = 0; ieta < 12; ieta++ ) {
+
+	for ( int ieta = 0; ieta < 6; ieta++ ) {
 		correlations::Complex qp = 0;
 		double wt = 0;
 		for ( int i = 0; i < sz; i++ ) {
-			correlations::QVector tq = q3[ieta];
-			if ( ieta == int(((*hEta)[i] + 2.4) * 10/4) ) {
-				tq.unfill((*hPhi)[i], (*hWeight)[i]);
+			correlations::QVector tq = qC;
+			if ( vEtaBin[i] == ieta or vEtaBin[i] == 12 - ieta ) {
+				tq.unfill( (*hPhi)[i], (*hWeight)[i] );
 			}
-			correlations::FromQVector *cq = 0;
-			switch ( cmode_ ) {
-				case 1:
-					cq = new correlations::closed::FromQVector(tq);
-					break;
-				case 2:
-					cq = new correlations::recurrence::FromQVector(tq);
-					break;
-				case 3:
-					cq = new correlations::recursive::FromQVector(tq);
-					break;
-			}
-			correlations::Result r = cq->calculate(2, hc);
-			qp += (*hWeight)[i] * correlations::Complex( TMath::Cos( -2. * (*hPhi)[i] ) , TMath::Sin( -2. * (*hPhi)[i] ) ) * r.sum();
-			wt += (*hWeight)[i] * r.weight();
-			delete cq;
 		}
+		switch ( cmode_ ) {
+			case 1:
+				cq = new correlations::closed::FromQVector(tq);
+				break;
+			case 2:
+				cq = new correlations::recurrence::FromQVector(tq);
+				break;
+			case 3:
+				cq = new correlations::recursive::FromQVector(tq);
+				break;
+		}
+		correlations::Result A = q3[ieta]->calculate(1, hc);
+		correlations::Result B = q3[12-ieta]->calculate(1, hc);
+		correlations::Result C = qC->calculate(1, hc2);
+
+		auto qp = A.sum() * B.sum() * C.sum();
+		auto weight = A.weight() * B.weight() * C.weight();
+
 		rQ1Q1_Q2[ieta] = qp.real();
 		wQ1Q1_Q2[ieta] = wt;
 	}
+
+//	for ( int ieta = 0; ieta < 12; ieta++ ) {
+//		correlations::Complex qp = 0;
+//		double wt = 0;
+//		for ( int i = 0; i < sz; i++ ) {
+//			correlations::QVector tq = q3[ieta];
+//			if ( ieta == int(((*hEta)[i] + 2.4) * 10/4) ) {
+//				tq.unfill((*hPhi)[i], (*hWeight)[i]);
+//			}
+//			correlations::FromQVector *cq = 0;
+//			switch ( cmode_ ) {
+//				case 1:
+//					cq = new correlations::closed::FromQVector(tq);
+//					break;
+//				case 2:
+//					cq = new correlations::recurrence::FromQVector(tq);
+//					break;
+//				case 3:
+//					cq = new correlations::recursive::FromQVector(tq);
+//					break;
+//			}
+//			correlations::Result r = cq->calculate(2, hc);
+//			qp += (*hWeight)[i] * correlations::Complex( TMath::Cos( -2. * (*hPhi)[i] ) , TMath::Sin( -2. * (*hPhi)[i] ) ) * r.sum();
+//			wt += (*hWeight)[i] * r.weight();
+//			delete cq;
+//		}
+//		rQ1Q1_Q2[ieta] = qp.real();
+//		wQ1Q1_Q2[ieta] = wt;
+//	}
 
 	for ( int i = 0; i < sz; i++ ) {
 		int ieta = int(((*hEta)[i] + 2.4) * 10/4);
@@ -205,9 +249,12 @@ QWV1Cumu::initQ()
 	hc[0] = 1;
 	hc[1] = 1;
 //	hc[2] = -2;
+	hc2 = correlations::HarmonicVector(1);
+	hc2[0] = -2;
 	for ( int i = 0; i < 12; i++ ) {
 		q3[i].resize(hc);
 	}
+	qC.resize(hc2);
 }
 
 void
@@ -216,6 +263,7 @@ QWV1Cumu::doneQ()
 	for ( int i = 0; i < 12; i++ ) {
 		q3[i].reset();
 	}
+	qC.reset();
 }
 
 // ------------ method called once each job just before starting event loop  ------------
