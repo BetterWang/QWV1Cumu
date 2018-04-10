@@ -14,7 +14,6 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 
-
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring("file:/afs/cern.ch/work/q/qwang/public/amptDefault_cfi_py_GEN_1.root")
 )

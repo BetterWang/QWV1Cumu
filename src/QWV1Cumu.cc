@@ -144,10 +144,11 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	std::vector<int>	vEtaBin(sz);
 
+//	PRD(sz);
 	for ( int i = 0; i < sz; i++ ) {
 		if ( ((*hEta)[i]) > etaCmin_ and ((*hEta)[i]) < etaCmax_ ) qC.fill( (*hPhi)[i], (*hWeight)[i] );
 		int ieta = (((*hEta)[i] + 2.4) * 10)/4;
-		vEtaBin[ieta] = ieta;
+		vEtaBin[i] = ieta;
 		if ( ieta < 0 or ieta >= 12 ) {
 			continue;
 		};
@@ -164,34 +165,43 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	}
 
 	for ( int ieta = 0; ieta < 6; ieta++ ) {
-		correlations::Complex qp = 0;
-		double wt = 0;
+		correlations::QVector tq = qC;
 		for ( int i = 0; i < sz; i++ ) {
-			correlations::QVector tq = qC;
-			if ( vEtaBin[i] == ieta or vEtaBin[i] == 12 - ieta ) {
+			if ( vEtaBin[i] == ieta or vEtaBin[i] == 11 - ieta ) {
 				tq.unfill( (*hPhi)[i], (*hWeight)[i] );
 			}
 		}
+		std::unique_ptr<correlations::FromQVector> cqA;
+		std::unique_ptr<correlations::FromQVector> cqB;
+		std::unique_ptr<correlations::FromQVector> cqC;
 		switch ( cmode_ ) {
 			case 1:
-				cq = new correlations::closed::FromQVector(tq);
+				cqA = std::make_unique< correlations::closed::FromQVector >(q3[ieta]);
+				cqB = std::make_unique< correlations::closed::FromQVector >(q3[11-ieta]);
+				cqC = std::make_unique< correlations::closed::FromQVector >(tq);
 				break;
 			case 2:
-				cq = new correlations::recurrence::FromQVector(tq);
+				cqA = std::make_unique< correlations::recurrence::FromQVector >(q3[ieta]);
+				cqB = std::make_unique< correlations::recurrence::FromQVector >(q3[11-ieta]);
+				cqC = std::make_unique< correlations::recurrence::FromQVector >(tq);
 				break;
 			case 3:
-				cq = new correlations::recursive::FromQVector(tq);
+				cqA = std::make_unique< correlations::recursive::FromQVector >(q3[ieta]);
+				cqB = std::make_unique< correlations::recursive::FromQVector >(q3[11-ieta]);
+				cqC = std::make_unique< correlations::recursive::FromQVector >(tq);
 				break;
 		}
-		correlations::Result A = q3[ieta]->calculate(1, hc);
-		correlations::Result B = q3[12-ieta]->calculate(1, hc);
-		correlations::Result C = qC->calculate(1, hc2);
+		correlations::Result A = cqA->calculate(1, hc);
+		correlations::Result B = cqB->calculate(1, hc);
+		correlations::Result C = cqC->calculate(1, hc2);
 
 		auto qp = A.sum() * B.sum() * C.sum();
-		auto weight = A.weight() * B.weight() * C.weight();
+		auto wt = A.weight() * B.weight() * C.weight();
 
 		rQ1Q1_Q2[ieta] = qp.real();
 		wQ1Q1_Q2[ieta] = wt;
+//		PRD(ieta);
+//		PRD(rQ1Q1_Q2[ieta]);
 	}
 
 //	for ( int ieta = 0; ieta < 12; ieta++ ) {
@@ -239,6 +249,7 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	trV->Fill();
 	doneQ();
+//	PRD(*ch);
 }
 
 

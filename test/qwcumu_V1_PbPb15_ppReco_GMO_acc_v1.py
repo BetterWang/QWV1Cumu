@@ -37,6 +37,9 @@ process.hltMB.HLTPaths = [
 process.hltMB.andOr = cms.bool(True)
 process.hltMB.throw = cms.bool(False)
 
+process.FakeRP = cms.EDProducer('QWDoubleProducer',
+	src = cms.untracked.double(0.0)
+)
 
 process.V1Cumu = cms.EDAnalyzer('QWV1Cumu'
 	, trackEta = cms.untracked.InputTag('QWGMOEvent', "eta")
@@ -45,6 +48,7 @@ process.V1Cumu = cms.EDAnalyzer('QWV1Cumu'
 	, trackWeight = cms.untracked.InputTag('QWGMOEvent', "weight")
 	, trackCharge = cms.untracked.InputTag('QWGMOEvent', "charge")
 	, vertexZ = cms.untracked.InputTag('QWGMOEvent', "vz")
+	, RP = cms.untracked.InputTag('FakeRP')
 	, centrality = cms.untracked.InputTag('centralityBins')
 	, minvz = cms.untracked.double(-15.0)
 	, maxvz = cms.untracked.double(15.0)
@@ -176,6 +180,7 @@ process.V1Cumu.trackWeight = cms.untracked.InputTag('QWPhiAcc')
 process.ana = cms.Path(
 		process.hfCoincFilter3 *
 		process.centralityBins*
+		process.FakeRP *
 		process.makeGMOEvent *
 		process.ppRecoCentFilter *
 		process.QWPhiAcc *
