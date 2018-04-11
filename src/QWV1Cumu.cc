@@ -262,34 +262,36 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		wV[ieta] += (*hWeight)[i];
 	}
 
-	TComplex trkQp(0., 0.);
-	TComplex trkQm(0., 0.);
-	for ( int i = 0; i < sz; i++ ) {
-		if ( (*hEta)[i] > etaTrackerMin_ and (*hEta)[i] < etaTrackerMax_ ) {
-			trkQp += TComplex((*hWeight)[i], (*hPhi)[i] );
-		} else
-		if ( (*hEta)[i] > -etaTrackerMax_ and (*hEta)[i] < -etaTrackerMin_ ) {
-			trkQm += TComplex((*hWeight)[i], (*hPhi)[i] );
-		}
-	}
-
-	TComplex q3point[12];
-	for ( int i = 0; i < sz; i++ ) {
-		if ( vEtaBin[i] < 0 or vEtaBin[i] >= 12 ) continue;
-
-		TComplex q3p;
-		if ( (*hEta)[i] > 0 ) {
-			q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQm.Theta() - (*hpsiHFm), true);
-		} else {
-			q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQp.Theta() - (*hpsiHFp), true);
+	if ( b3point_ ) {
+		TComplex trkQp(0., 0.);
+		TComplex trkQm(0., 0.);
+		for ( int i = 0; i < sz; i++ ) {
+			if ( (*hEta)[i] > etaTrackerMin_ and (*hEta)[i] < etaTrackerMax_ ) {
+				trkQp += TComplex((*hWeight)[i], (*hPhi)[i] );
+			} else
+				if ( (*hEta)[i] > -etaTrackerMax_ and (*hEta)[i] < -etaTrackerMin_ ) {
+					trkQm += TComplex((*hWeight)[i], (*hPhi)[i] );
+				}
 		}
 
-		q3point[ vEtaBin[i] ] += q3p;
-	}
+		TComplex q3point[12];
+		for ( int i = 0; i < sz; i++ ) {
+			if ( vEtaBin[i] < 0 or vEtaBin[i] >= 12 ) continue;
 
-	for ( int i = 0; i < 12; i++ ) {
-		r3point[i] = q3point[i].Re();
-		w3point[i] = q3point[i].Rho();
+			TComplex q3p;
+			if ( (*hEta)[i] > 0 ) {
+				q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQm.Theta() - (*hpsiHFm), true);
+			} else {
+				q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQp.Theta() - (*hpsiHFp), true);
+			}
+
+			q3point[ vEtaBin[i] ] += q3p;
+		}
+
+		for ( int i = 0; i < 12; i++ ) {
+			r3point[i] = q3point[i].Re();
+			w3point[i] = q3point[i].Rho();
+		}
 	}
 
 	edm::Handle<int> ch;
