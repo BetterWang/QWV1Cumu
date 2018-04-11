@@ -53,11 +53,14 @@ class QWV1Cumu : public edm::EDAnalyzer {
 		edm::InputTag					trackWeight_;
 		edm::InputTag					vertexZ_;
 		edm::InputTag					RP_;
+		edm::InputTag					psiHFp_;
+		edm::InputTag					psiHFm_;
 
 		edm::InputTag					centralityTag_;
 
 		double	minvz_, maxvz_;
 		double	etaCmin_, etaCmax_;
+		double	etaTrackerMin_, etaTrackerMax_;
 	/////////////////////////////////////////////
 //		double	rfpmineta_, rfpmaxeta_;
 //		double	rfpminpt_, rfpmaxpt_;
@@ -66,6 +69,7 @@ class QWV1Cumu : public edm::EDAnalyzer {
 
 		int	nvtx_;
 
+		bool	b3point_;
 	/////////////////////////////////////////////
 		TTree * trV;
 
@@ -79,6 +83,8 @@ class QWV1Cumu : public edm::EDAnalyzer {
 		double rV2[12];
 		double wV[12];
 
+		double r3point[12];
+		double w3point[12];
 
 		correlations::HarmonicVector	hc;
 		correlations::HarmonicVector	hc2;

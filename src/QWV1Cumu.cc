@@ -53,6 +53,8 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	trackWeight_( iConfig.getUntrackedParameter<edm::InputTag>("trackWeight") ),
 	vertexZ_( iConfig.getUntrackedParameter<edm::InputTag>("vertexZ") ),
 	RP_( iConfig.getUntrackedParameter<edm::InputTag>("RP") ),
+	psiHFp_( iConfig.getUntrackedParameter<edm::InputTag>("psiHFp") ),
+	psiHFm_( iConfig.getUntrackedParameter<edm::InputTag>("psiHFm") ),
 	centralityTag_( iConfig.getUntrackedParameter<edm::InputTag>("centrality") )
 {
 	//now do what ever initialization is needed
@@ -62,13 +64,14 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	etaCmin_ = iConfig.getUntrackedParameter<double>("etaCmin", -2.4);
 	etaCmax_ = iConfig.getUntrackedParameter<double>("etaCmax", 2.4);
 
-//	rfpmineta_ = iConfig.getUntrackedParameter<double>("rfpmineta", -2.4);
-//	rfpmaxeta_ = iConfig.getUntrackedParameter<double>("rfpmaxeta", 2.4);
-//	rfpminpt_ = iConfig.getUntrackedParameter<double>("rfpminpt", 0.3);
-//	rfpmaxpt_ = iConfig.getUntrackedParameter<double>("rfpmaxpt", 3.0);
+	etaTrackerMin_ = iConfig.getUntrackedParameter<double>("etaTrackerMin", 2.0);
+	etaTrackerMax_ = iConfig.getUntrackedParameter<double>("etaTrackerMax", 2.4);
 
 	cmode_ = iConfig.getUntrackedParameter<int>("cmode", 1);
 	nvtx_ = iConfig.getUntrackedParameter<int>("nvtx", 100);
+
+	if ( psiHFp_.label() == "NA" ) b3point_ = false;
+	else b3point_ = true;
 
         consumes<int>(centralityTag_);
         consumes<std::vector<double> >(trackEta_);
@@ -77,6 +80,10 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
         consumes<std::vector<double> >(trackWeight_);
         consumes<std::vector<double> >(vertexZ_);
         consumes<double>(RP_);
+	if ( b3point_ ) {
+        	consumes<double>(psiHFp_);
+        	consumes<double>(psiHFm_);
+	}
 
 	for ( int i = 0; i < 12; i++ ) {
 		q3[i] = correlations::QVector(0, 0, true);
@@ -98,6 +105,9 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	trV->Branch("rV1", &rV1, "rV1[12]/D");
 	trV->Branch("rV2", &rV2, "rV2[12]/D");
 	trV->Branch("wV",  &wV,  "wV[12]/D");
+
+	trV->Branch("r3point", &r3point, "r3point[12]/D");
+	trV->Branch("w3point", &w3point, "w3point[12]/D");
 
 	cout << " cmode_ = " << cmode_ << endl;
 
@@ -129,6 +139,8 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	Handle<std::vector<double> >	hWeight;
 	Handle<std::vector<double> >	hVz;
 	Handle<double>			hRP;
+	Handle<double>			hpsiHFp;
+	Handle<double>			hpsiHFm;
 
 	iEvent.getByLabel(trackEta_,	hEta);
 	iEvent.getByLabel(trackPhi_,	hPhi);
@@ -136,6 +148,11 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	iEvent.getByLabel(trackWeight_, hWeight);
 	iEvent.getByLabel(vertexZ_, 	hVz);
 	iEvent.getByLabel(RP_,	 	hRP);
+
+	if ( b3point_ ) {
+		iEvent.getByLabel(psiHFp_,	hpsiHFp);
+		iEvent.getByLabel(psiHFm_,	hpsiHFm);
+	}
 
 	if ( hVz->size() < 1 ) return;
 	if ( fabs((*hVz)[0]) > maxvz_ or fabs((*hVz)[0]) < minvz_ ) return;
@@ -162,6 +179,8 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		rV1[i] = 0;
 		rV2[i] = 0;
 		wV[i] = 0;
+		r3point[i] = 0;
+		w3point[i] = 0;
 	}
 
 	for ( int ieta = 0; ieta < 6; ieta++ ) {
@@ -242,6 +261,37 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		wV[ieta] += (*hWeight)[i];
 	}
+
+	TComplex trkQp(0., 0.);
+	TComplex trkQm(0., 0.);
+	for ( int i = 0; i < sz; i++ ) {
+		if ( (*hEta)[i] > etaTrackerMin_ and (*hEta)[i] < etaTrackerMax_ ) {
+			trkQp += TComplex((*hWeight)[i], (*hPhi)[i] );
+		} else
+		if ( (*hEta)[i] > -etaTrackerMax_ and (*hEta)[i] < -etaTrackerMin_ ) {
+			trkQm += TComplex((*hWeight)[i], (*hPhi)[i] );
+		}
+	}
+
+	TComplex q3point[12];
+	for ( int i = 0; i < sz; i++ ) {
+		if ( vEtaBin[i] < 0 or vEtaBin[i] >= 12 ) continue;
+
+		TComplex q3p;
+		if ( (*hEta)[i] > 0 ) {
+			q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQm.Theta() - (*hpsiHFm), true);
+		} else {
+			q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQp.Theta() - (*hpsiHFp), true);
+		}
+
+		q3point[ vEtaBin[i] ] += q3p;
+	}
+
+	for ( int i = 0; i < 12; i++ ) {
+		r3point[i] = q3point[i].Re();
+		w3point[i] = q3point[i].Rho();
+	}
+
 	edm::Handle<int> ch;
 	iEvent.getByLabel(centralityTag_,ch);
 	gNoff = *ch;
