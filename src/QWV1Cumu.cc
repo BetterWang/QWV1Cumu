@@ -109,6 +109,11 @@ QWV1Cumu::QWV1Cumu(const edm::ParameterSet& iConfig):
 	trV->Branch("r3point", &r3point, "r3point[12]/D");
 	trV->Branch("w3point", &w3point, "w3point[12]/D");
 
+	trV->Branch("r3pointPtP", &r3pointPtP, "r3pointPtP[8]/D");
+	trV->Branch("r3pointPtM", &r3pointPtM, "r3pointPtM[8]/D");
+	trV->Branch("w3pointPtP", &w3pointPtP, "w3pointPtP[8]/D");
+	trV->Branch("w3pointPtM", &w3pointPtM, "w3pointPtM[8]/D");
+
 	cout << " cmode_ = " << cmode_ << endl;
 
 	initQ();
@@ -160,6 +165,7 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	if ( sz == 0 ) return;
 
 	std::vector<int>	vEtaBin(sz);
+	std::vector<int>	vPtBin(sz);
 
 //	PRD(sz);
 	for ( int i = 0; i < sz; i++ ) {
@@ -170,7 +176,12 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 			continue;
 		};
 		q3[ieta].fill( (*hPhi)[i], (*hWeight)[i] );
+	}
 
+	for ( int i = 0; i < sz; i++ ) {
+		int ipt = 0;
+		while ( (*hPt)[i] > ptBin[ipt+1] ) ipt++;
+		vPtBin[i] = ipt;
 	}
 
 	for ( int i = 0; i < 12; i++ ) {
@@ -181,6 +192,13 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		wV[i] = 0;
 		r3point[i] = 0;
 		w3point[i] = 0;
+	}
+
+	for ( int i = 0; i < 8; i++ ) {
+		r3pointPtP[i] = 0;
+		r3pointPtM[i] = 0;
+		w3pointPtP[i] = 0;
+		w3pointPtM[i] = 0;
 	}
 
 	for ( int ieta = 0; ieta < 6; ieta++ ) {
@@ -275,23 +293,34 @@ QWV1Cumu::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		}
 
 		TComplex q3point[12];
+		TComplex q3pointPtP[8];
+		TComplex q3pointPtM[8];
 		for ( int i = 0; i < sz; i++ ) {
 			if ( vEtaBin[i] < 0 or vEtaBin[i] >= 12 ) continue;
 
-			TComplex q3p;
 			if ( (*hEta)[i] > 0 ) {
-				q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQm.Theta() - (*hpsiHFm), true);
+				TComplex q3p = TComplex( (*hWeight)[i], (*hPhi)[i] - (*hpsiHFm), true);
+				q3point[ vEtaBin[i] ] += q3p * trkQm;
+				q3pointPtP[ vPtBin[i] ] += q3p * trkQm;
 			} else {
-				q3p = TComplex( (*hWeight)[i], (*hPhi)[i] + trkQp.Theta() - (*hpsiHFp), true);
+				TComplex q3p = TComplex( (*hWeight)[i], (*hPhi)[i] - (*hpsiHFp), true);
+				q3point[ vEtaBin[i] ] += q3p * trkQp;
+				q3pointPtM[ vPtBin[i] ] += q3p * trkQp;
 			}
-
-			q3point[ vEtaBin[i] ] += q3p;
 		}
 
 		for ( int i = 0; i < 12; i++ ) {
 			r3point[i] = q3point[i].Re();
 			w3point[i] = q3point[i].Rho();
 		}
+		for ( int i = 0; i < 8; i++ ) {
+			r3pointPtP[i] = q3pointPtP[i].Re();
+			r3pointPtM[i] = q3pointPtM[i].Re();
+
+			w3pointPtP[i] = q3pointPtP[i].Rho();
+			w3pointPtM[i] = q3pointPtM[i].Rho();
+		}
+
 	}
 
 	edm::Handle<int> ch;
