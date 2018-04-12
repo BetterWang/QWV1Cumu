@@ -86,8 +86,8 @@ class QWV1Cumu : public edm::EDAnalyzer {
 		double r3point[12];
 		double w3point[12];
 
-		//                      0,   1,   2,   3,    4,   5,   6,   7,   8
-		double const ptBin = {0.3, 0.5, 0.7, 1.0, 1.25, 1.5, 2.0, 2.5, 10000.0};
+		//                         0,   1,   2,   3,    4,   5,   6,   7,   8
+		double const ptBin[9] = {0.3, 0.5, 0.7, 1.0, 1.25, 1.5, 2.0, 2.5, 10000.0};
 		double r3pointPtP[8];
 		double r3pointPtM[8];
 		double w3pointPtP[8];
