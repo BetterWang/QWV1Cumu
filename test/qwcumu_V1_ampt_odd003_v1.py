@@ -21,7 +21,7 @@ process.source = cms.Source("PoolSource",
 )
 
 #process.AftBurner.modv1 = cms.InputTag("0.0")
-process.AftBurner.modv1 = cms.InputTag("v1odd")
+process.AftBurner.modv1 = cms.InputTag("v1odd003")
 #process.AftBurner.modv2 = cms.InputTag("0.165646*exp(-( (x-2.64741)/1.36298 + exp( -(x-2.64741)/1.36298 ) )/2.)")
 #process.AftBurner.modv2 = cms.InputTag("0.0986502659")
 process.AftBurner.fluct_v1 = cms.double(0.0)
