@@ -23,7 +23,7 @@
 #include "TComplex.h"
 #include <complex>
 
-
+#include <iostream>
 using namespace std;
 
 //#ifdef QW_DEBUG
@@ -58,10 +58,7 @@ class QWRecenter : public edm::EDAnalyzer {
 		TH1D * hS2[20][12];
 		TH1D * hC2[20][12];
 
-		TH1D * hNS1[20][12];
-		TH1D * hNC1[20][12];
-		TH1D * hNS2[20][12];
-		TH1D * hNC2[20][12];
+		TH1D * hN[20][12];
 };
 
 
@@ -94,10 +91,7 @@ QWRecenter::QWRecenter(const edm::ParameterSet& iConfig):
 			hS2[ipt][ieta] = fs->make<TH1D>(Form("hS2_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
 			hC2[ipt][ieta] = fs->make<TH1D>(Form("hC2_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
 
-			hNS1[ipt][ieta] = fs->make<TH1D>(Form("hNS1_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
-			hNC1[ipt][ieta] = fs->make<TH1D>(Form("hNC1_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
-			hNS2[ipt][ieta] = fs->make<TH1D>(Form("hNS2_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
-			hNC2[ipt][ieta] = fs->make<TH1D>(Form("hNC2_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
+			hN[ipt][ieta] = fs->make<TH1D>(Form("hN_%i_%i", ipt, ieta), Form("%0.1f<pT<%0.1f, %0.1f<eta<%0.1f", ptBin[ipt], ptBin[ipt+1], 0.4*ieta - 2.4, 0.4*ieta - 2.0), 200, 0, 200);
 		}
 	}
 }
@@ -153,6 +147,12 @@ QWRecenter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		while ( (*hPt)[i] > ptBin[ipt+1] ) ipt++;
 		vPtBin[i] = ipt;
 	}
+//	cout << " cent = " << *ch << endl;
+//	for ( int i = 0; i < sz; i++ ) {
+//		int ipt = vPtBin[i];
+//		int ieta = vEtaBin[i];
+//		if ( ipt == 0 and ieta == 0 ) cout << " i = " << i << " eta = " << (*hEta)[i] << " ieta = " << vEtaBin[i] << " pt  = " << (*hPt)[i] << " ipt = " << ipt << " weight = " << (*hWeight)[i] << endl;
+//	}
 
 	for ( int i = 0; i < sz; i++ ) {
 		int ipt = vPtBin[i];
@@ -165,10 +165,7 @@ QWRecenter::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 		hS2[ipt][ieta]->Fill( (*ch), (*hWeight)[i] * TMath::Sin( 2*(*hPhi)[i] ) );
 		hC2[ipt][ieta]->Fill( (*ch), (*hWeight)[i] * TMath::Cos( 2*(*hPhi)[i] ) );
 
-		hNS1[ipt][ieta]->Fill( (*ch), (*hWeight)[i] );
-		hNC1[ipt][ieta]->Fill( (*ch), (*hWeight)[i] );
-		hNS2[ipt][ieta]->Fill( (*ch), (*hWeight)[i] );
-		hNC2[ipt][ieta]->Fill( (*ch), (*hWeight)[i] );
+		hN[ipt][ieta]->Fill( (*ch), (*hWeight)[i] );
 	}
 }
 
